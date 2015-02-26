@@ -158,6 +158,13 @@ public final class BluetoothA2dp implements BluetoothProfile {
         doBind();
     }
 
+    /**
+    * @hide
+    */
+    public BluetoothA2dp(Context context) {
+        this(context, null);
+    }
+
     boolean doBind() {
         Intent intent = new Intent(IBluetoothA2dp.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);

@@ -127,6 +127,22 @@ public final class Bitmap implements Parcelable {
         }
     }
 
+    private Bitmap(int nativeBitmap, boolean isMutable, byte[] ninePatchChunk,
+            int density) {
+        if (nativeBitmap == 0) {
+            throw new RuntimeException("internal error: native bitmap is 0");
+        }
+
+        // we delete this in our finalizer
+        mNativeBitmap = nativeBitmap;
+        mIsMutable = isMutable;
+        mNinePatchChunk = ninePatchChunk;
+        mFinalizer = new BitmapFinalizer(nativeBitmap);
+        if (density >= 0) {
+            mDensity = density;
+        }
+    }
+
     /**
      * Native bitmap has been reconfigured, so set premult and cached
      * width/height values

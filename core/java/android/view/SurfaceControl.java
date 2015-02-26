@@ -77,7 +77,7 @@ public class SurfaceControl {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private final String mName;
-    int mNativeObject; // package visibility only for Surface.java access
+    int mNativeSurface; // package visibility only for Surface.java access
 
     private static final boolean HEADLESS = "1".equals(
         SystemProperties.get("ro.config.headless", "0"));
@@ -235,8 +235,8 @@ public class SurfaceControl {
         checkHeadless();
 
         mName = name;
-        mNativeObject = nativeCreate(session, name, w, h, format, flags);
-        if (mNativeObject == 0) {
+        mNativeSurface = nativeCreate(session, name, w, h, format, flags);
+        if (mNativeSurface == 0) {
             throw new OutOfResourcesException(
                     "Couldn't allocate SurfaceControl native object");
         }
@@ -250,8 +250,8 @@ public class SurfaceControl {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            if (mNativeObject != 0) {
-                nativeRelease(mNativeObject);
+            if (mNativeSurface != 0) {
+                nativeRelease(mNativeSurface);
             }
         } finally {
             super.finalize();
@@ -269,9 +269,9 @@ public class SurfaceControl {
      * This will make the surface invalid.
      */
     public void release() {
-        if (mNativeObject != 0) {
-            nativeRelease(mNativeObject);
-            mNativeObject = 0;
+        if (mNativeSurface != 0) {
+            nativeRelease(mNativeSurface);
+            mNativeSurface = 0;
         }
         mCloseGuard.close();
     }
@@ -282,16 +282,16 @@ public class SurfaceControl {
      * called from the process that created the service.
      */
     public void destroy() {
-        if (mNativeObject != 0) {
-            nativeDestroy(mNativeObject);
-            mNativeObject = 0;
+        if (mNativeSurface != 0) {
+            nativeDestroy(mNativeSurface);
+            mNativeSurface = 0;
         }
         mCloseGuard.close();
     }
 
     private void checkNotReleased() {
-        if (mNativeObject == 0) throw new NullPointerException(
-                "mNativeObject is null. Have you called release() already?");
+        if (mNativeSurface == 0) throw new NullPointerException(
+                "mNativeSurface is null. Have you called release() already?");
     }
 
     /*
@@ -316,62 +316,62 @@ public class SurfaceControl {
 
     public void setLayer(int zorder) {
         checkNotReleased();
-        nativeSetLayer(mNativeObject, zorder);
+        nativeSetLayer(mNativeSurface, zorder);
     }
 
     public void setPosition(float x, float y) {
         checkNotReleased();
-        nativeSetPosition(mNativeObject, x, y);
+        nativeSetPosition(mNativeSurface, x, y);
     }
 
     public void setSize(int w, int h) {
         checkNotReleased();
-        nativeSetSize(mNativeObject, w, h);
+        nativeSetSize(mNativeSurface, w, h);
     }
 
     public void hide() {
         checkNotReleased();
-        nativeSetFlags(mNativeObject, SURFACE_HIDDEN, SURFACE_HIDDEN);
+        nativeSetFlags(mNativeSurface, SURFACE_HIDDEN, SURFACE_HIDDEN);
     }
 
     public void show() {
         checkNotReleased();
-        nativeSetFlags(mNativeObject, 0, SURFACE_HIDDEN);
+        nativeSetFlags(mNativeSurface, 0, SURFACE_HIDDEN);
     }
 
     public void setTransparentRegionHint(Region region) {
         checkNotReleased();
-        nativeSetTransparentRegionHint(mNativeObject, region);
+        nativeSetTransparentRegionHint(mNativeSurface, region);
     }
 
     public void setAlpha(float alpha) {
         checkNotReleased();
-        nativeSetAlpha(mNativeObject, alpha);
+        nativeSetAlpha(mNativeSurface, alpha);
     }
 
     public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
         checkNotReleased();
-        nativeSetMatrix(mNativeObject, dsdx, dtdx, dsdy, dtdy);
+        nativeSetMatrix(mNativeSurface, dsdx, dtdx, dsdy, dtdy);
     }
 
     public void setFlags(int flags, int mask) {
         checkNotReleased();
-        nativeSetFlags(mNativeObject, flags, mask);
+        nativeSetFlags(mNativeSurface, flags, mask);
     }
 
     public void setWindowCrop(Rect crop) {
         checkNotReleased();
         if (crop != null) {
-            nativeSetWindowCrop(mNativeObject,
+            nativeSetWindowCrop(mNativeSurface,
                 crop.left, crop.top, crop.right, crop.bottom);
         } else {
-            nativeSetWindowCrop(mNativeObject, 0, 0, 0, 0);
+            nativeSetWindowCrop(mNativeSurface, 0, 0, 0, 0);
         }
     }
 
     public void setLayerStack(int layerStack) {
         checkNotReleased();
-        nativeSetLayerStack(mNativeObject, layerStack);
+        nativeSetLayerStack(mNativeSurface, layerStack);
     }
 
     /*
@@ -492,7 +492,7 @@ public class SurfaceControl {
 
         if (surface != null) {
             synchronized (surface.mLock) {
-                nativeSetDisplaySurface(displayToken, surface.mNativeObject);
+                nativeSetDisplaySurface(displayToken, surface.mNativeSurface);
             }
         } else {
             nativeSetDisplaySurface(displayToken, 0);

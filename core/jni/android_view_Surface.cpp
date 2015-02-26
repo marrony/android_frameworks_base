@@ -56,7 +56,7 @@ static const char* const OutOfResourcesException =
 
 static struct {
     jclass clazz;
-    jfieldID mNativeObject;
+    jfieldID mNativeSurface;
     jfieldID mLock;
     jmethodID ctor;
 } gSurfaceClassInfo;
@@ -97,7 +97,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
             gSurfaceClassInfo.mLock);
     if (env->MonitorEnter(lock) == JNI_OK) {
         sur = reinterpret_cast<Surface *>(
-                env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeObject));
+                env->GetIntField(surfaceObj, gSurfaceClassInfo.mNativeSurface));
         env->MonitorExit(lock);
     }
     return sur;
@@ -281,7 +281,7 @@ static jint nativeLockCanvas(JNIEnv* env, jclass clazz,
     }
 
     // Create another reference to the surface and return it.  This reference
-    // should be passed to nativeUnlockCanvasAndPost in place of mNativeObject,
+    // should be passed to nativeUnlockCanvasAndPost in place of mNativeSurface,
     // because the latter could be replaced while the surface is locked.
     sp<Surface> lockedSurface(surface);
     lockedSurface->incStrong(&sRefBaseOwner);
@@ -403,8 +403,8 @@ int register_android_view_Surface(JNIEnv* env)
 
     jclass clazz = env->FindClass("android/view/Surface");
     gSurfaceClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
-    gSurfaceClassInfo.mNativeObject =
-            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeObject", "I");
+    gSurfaceClassInfo.mNativeSurface =
+            env->GetFieldID(gSurfaceClassInfo.clazz, "mNativeSurface", "I");
     gSurfaceClassInfo.mLock =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mLock", "Ljava/lang/Object;");
     gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "(I)V");
